@@ -41,7 +41,7 @@ Debounce
 You can debounce miswriting password for prevent bruteforce attack.
 The debounce is random for cover the tracks.
 
-```
+```php
 # Set your min/max randow debounce
 $auth->debounce(500, 1500);
 
