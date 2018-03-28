@@ -16,10 +16,10 @@
         }
     ],
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.1"
     },
     "autoload": {
-        "psr-4": { "Coercive\\Security\\Authentification\\": "" }
+        "psr-4": { "Coercive\\Security\\Authentification\\": "dist/" }
     },
     "minimum-stability" : "dev",
     "prefer-stable" : true,
