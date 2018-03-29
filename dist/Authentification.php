@@ -51,7 +51,7 @@ class Authentification
 	 */
 	public function debounce(int $min = 1000, int $max = 2000): Authentification
 	{
-		$this->debounce = rand($min, $max);
+		$this->debounce = rand($min, $max) * 1000;
 		return $this;
 	}
 
