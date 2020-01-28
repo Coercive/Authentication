@@ -8,7 +8,7 @@ namespace Coercive\Security\Authentification;
  * @link		https://github.com/Coercive/Authentification
  *
  * @author  	Anthony Moral <contact@coercive.fr>
- * @copyright   2018 Anthony Moral
+ * @copyright   2020 Anthony Moral
  * @license 	MIT
  */
 class Authentification
@@ -16,14 +16,14 @@ class Authentification
 	/** @var int : Default cost of hash method */
 	const DEFAULT_COST = 15;
 
-	/** @var int : Default cost of hash method */
+	/** @var int : Default hash algo method */
 	const DEFAULT_ALGO = PASSWORD_BCRYPT;
 
 	/** @var int : Cost of hash method */
-	private $cost;
+	private $cost = self::DEFAULT_COST;
 
-	/** @var int : Algo of hash method */
-	private $algo;
+	/** @var mixed : Algo of hash method */
+	private $algo = self::DEFAULT_ALGO;
 
 	/** @var int : Debounce delay for miswriting password */
 	private $debounce = 0;
@@ -32,12 +32,16 @@ class Authentification
 	 * Authentification constructor.
 	 *
 	 * @param int $cost [optional]
-	 * @param int $algo [optional]
+	 * @param mixed $algo [optional]
 	 */
-	public function __construct(int $cost = self::DEFAULT_COST, int $algo = self::DEFAULT_ALGO)
+	public function __construct(int $cost = null, $algo = null)
 	{
-		$this->cost = $cost;
-		$this->algo = $algo;
+		if(null !== $cost) {
+			$this->cost = $cost;
+		}
+		if(null !== $algo) {
+			$this->algo = $algo;
+		}
 	}
 
 	/**
