@@ -1,18 +1,18 @@
-Coercive Authentification Security
-==================================
+Coercive Authentication Security
+================================
 
 Use PHP password hash system.
 
 Get
 ---
 ```
-composer require coercive/authentification
+composer require coercive/authentication
 ```
 
 Usage
 -----
 ```php
-use Coercive\Security\Authentification\Authentification;
+use Coercive\Security\Authentication\Authentication;
 $auth = new Authentification;
 
 # EXAMPLE PASS

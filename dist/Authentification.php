@@ -1,17 +1,17 @@
 <?php
-namespace Coercive\Security\Authentification;
+namespace Coercive\Security\Authentication;
 
 /**
- * Authentification
+ * Authentication
  *
- * @package 	Coercive\Security\Authentification
- * @link		https://github.com/Coercive/Authentification
+ * @package 	Coercive\Security\Authentication
+ * @link		https://github.com/Coercive/Authentication
  *
  * @author  	Anthony Moral <contact@coercive.fr>
  * @copyright   2020 Anthony Moral
  * @license 	MIT
  */
-class Authentification
+class Authentication
 {
 	/** @var int : Default cost of hash method */
 	const DEFAULT_COST = 15;
@@ -29,7 +29,7 @@ class Authentification
 	private $debounce = 0;
 
 	/**
-	 * Authentification constructor.
+	 * Authentication constructor.
 	 *
 	 * @param int $cost [optional]
 	 * @param mixed $algo [optional]
@@ -51,9 +51,9 @@ class Authentification
 	 *
 	 * @param int $min [optional] In milliseconds
 	 * @param int $max [optional] In milliseconds
-	 * @return Authentification
+	 * @return Authentication
 	 */
-	public function debounce(int $min = 1000, int $max = 2000): Authentification
+	public function debounce(int $min = 1000, int $max = 2000): Authentication
 	{
 		$this->debounce = rand($min, $max) * 1000;
 		return $this;

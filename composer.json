@@ -1,12 +1,12 @@
 {
-    "name": "coercive/authentification",
+    "name": "coercive/authentication",
     "type": "library",
-    "description": "Coercive Authentification Security",
+    "description": "Coercive Authentication Security",
     "homepage": "http://coercive.fr",
     "license": "MIT",
     "licenses": [{
       "type": "MIT",
-      "url": "https://github.com/Coercive/Authentification/blob/master/LICENSE.txt"
+      "url": "https://github.com/Coercive/Authentication/blob/master/LICENSE.txt"
     }],
     "authors": [
         {
@@ -19,7 +19,7 @@
         "php": ">=7"
     },
     "autoload": {
-        "psr-4": { "Coercive\\Security\\Authentification\\": "dist/" }
+        "psr-4": { "Coercive\\Security\\Authentication\\": "dist/" }
     },
     "minimum-stability" : "dev",
     "prefer-stable" : true,
