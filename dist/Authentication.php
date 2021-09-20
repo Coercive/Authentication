@@ -20,13 +20,13 @@ class Authentication
 	const DEFAULT_ALGO = PASSWORD_BCRYPT;
 
 	/** @var int : Cost of hash method */
-	private $cost = self::DEFAULT_COST;
+	private int $cost = self::DEFAULT_COST;
 
 	/** @var mixed : Algo of hash method */
 	private $algo = self::DEFAULT_ALGO;
 
 	/** @var int : Debounce delay for miswriting password */
-	private $debounce = 0;
+	private int $debounce = 0;
 
 	/**
 	 * Authentication constructor.
@@ -34,7 +34,7 @@ class Authentication
 	 * @param int $cost [optional]
 	 * @param mixed $algo [optional]
 	 */
-	public function __construct(int $cost = null, $algo = null)
+	public function __construct(? int $cost = null, $algo = null)
 	{
 		if(null !== $cost) {
 			$this->cost = $cost;
@@ -80,7 +80,9 @@ class Authentication
 	public function verify(string $password, string $hash): bool
 	{
 		$state = password_verify($password, $hash);
-		if(!$state && $this->debounce) { usleep($this->debounce); }
+		if(!$state && $this->debounce) {
+			RateLimit::sleep($this->debounce);
+		}
 		return $state;
 	}
 

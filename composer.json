@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": ">=7"
+        "php": ">=7.4"
     },
     "autoload": {
         "psr-4": { "Coercive\\Security\\Authentication\\": "dist/" }
