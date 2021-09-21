@@ -58,6 +58,12 @@ class RateLimit
 	private ? string $ip = null;
 
 	/**
+	 * Last allowed entries quantity
+	 * @var int
+	 */
+	private int $lastNb = 0;
+
+	/**
 	 * @param int $delay
 	 * @return void
 	 */
@@ -181,8 +187,11 @@ class RateLimit
 	}
 
 	/**
+	 * Add IP entry with timestamp
+	 *
 	 * @param string $ip [optional]
 	 * @return $this
+	 * @throws Exception
 	 */
 	public function set(string $ip = null): RateLimit
 	{
@@ -200,12 +209,15 @@ class RateLimit
 	}
 
 	/**
+	 * Count IP entries in period
+	 *
 	 * @param string $ip [optional]
 	 * @return int|null
 	 * @throws Exception
 	 */
 	public function get(string $ip = null): ?int
 	{
+		$this->lastNb = 0;
 		if(!$ip) {
 			$ip = $this->ip;
 		}
@@ -213,13 +225,13 @@ class RateLimit
 			throw new Exception('Empty given IP and empty global IP.');
 		}
 		if(!$this->isEnabled()) {
-			return 0;
+			return $this->lastNb;
 		}
 
 		$path = $this->path . DIRECTORY_SEPARATOR . sha1($ip);
 		$tmp = $this->path . DIRECTORY_SEPARATOR . sha1($ip) . '.tmp';
 		if(!is_file($path)) {
-			return 0;
+			return $this->lastNb;
 		}
 		$now = time();
 		$filemtime = filemtime($path);
@@ -228,7 +240,7 @@ class RateLimit
 		}
 		elseif($now - $filemtime > $this->period) {
 			unlink($path);
-			return 0;
+			return $this->lastNb;
 		}
 
 		$nb = 0; $fail = false;
@@ -271,56 +283,57 @@ class RateLimit
 		if($fail) {
 			return null;
 		}
-		return $nb;
+		rename($tmp, $path);
+		return $this->lastNb = $nb;
 	}
 
 	/**
 	 * @param string $ip [optional]
 	 * @param bool $strict [optional]
 	 * @return bool
+	 * @throws Exception
 	 */
 	public function isAllowed(string $ip = null, bool $strict = false): bool
 	{
 		$result = $this->get($ip);
 		$allowed = ($strict ? null !== $result : true) && $this->requests >= $result;
 		if(!$allowed && $this->debounce) {
-			$this->sleep();
+			self::sleep($this->debounce);
 		}
 		return $allowed;
 	}
 
 	/**
-	 * Clear all files
-	 *
-	 * @return $this
+	 * @return int
 	 */
-	public function clear(): RateLimit
+	public function lastNb(): int
 	{
-		if($this->isEnabled()) {
-			$files = glob($this->path . '/{,.}*', GLOB_BRACE);
-			foreach($files as $file) {
-				if(is_file($file)) {
-					unlink($file);
-				}
-			}
-		}
-		return $this;
+		return $this->lastNb;
 	}
 
 	/**
-	 * Drop all expired files
+	 * Clear all files or expired files
 	 *
+	 * @param bool $expire [optional]
 	 * @return $this
 	 */
-	public function expire(): RateLimit
+	public function clear(bool $expire = true): RateLimit
 	{
-		if($this->isEnabled()) {
-			$now = time();
-			$files = glob($this->path . DIRECTORY_SEPARATOR . '{,.}*', GLOB_BRACE);
-			foreach($files as $file) {
-				$filemtime = filemtime($file);
-				if(is_file($file) && (false === $filemtime || $now - $filemtime > $this->period)) {
+		if(!$this->isEnabled()) {
+			return $this;
+		}
+		$now = time();
+		$files = glob($this->path . DIRECTORY_SEPARATOR . '{,.}*', GLOB_BRACE);
+		foreach($files as $file) {
+			if(is_file($file)) {
+				if(!$expire) {
 					unlink($file);
+				}
+				else {
+					$filemtime = filemtime($file);
+					if(false === $filemtime || $now - $filemtime > $this->period) {
+						unlink($file);
+					}
 				}
 			}
 		}
