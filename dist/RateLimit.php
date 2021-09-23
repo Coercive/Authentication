@@ -228,6 +228,7 @@ class RateLimit
 	public function get(string $ip = null): ?int
 	{
 		$this->lastNb = 0;
+
 		if(!$ip) {
 			$ip = $this->ip;
 		}
@@ -235,13 +236,13 @@ class RateLimit
 			throw new Exception('Empty given IP and empty global IP.');
 		}
 		if(!$this->isEnabled()) {
-			return $this->lastNb;
+			return 0;
 		}
 
-		$path = $this->path . DIRECTORY_SEPARATOR . sha1($ip);
-		$tmp = $this->path . DIRECTORY_SEPARATOR . sha1($ip) . '.tmp';
+		$filename = sha1($ip);
+		$path = $this->path . DIRECTORY_SEPARATOR . $filename;
 		if(!is_file($path)) {
-			return $this->lastNb;
+			return 0;
 		}
 		$now = time();
 		$filemtime = filemtime($path);
@@ -250,51 +251,24 @@ class RateLimit
 		}
 		elseif($now - $filemtime > $this->period) {
 			unlink($path);
-			return $this->lastNb;
+			return 0;
 		}
 
-		$nb = 0; $fail = false;
-		$file = fopen($path, 'r');
-		$new = fopen($tmp, 'w');
-		if ($file && $new) {
-			do {
-				$locked = flock($file, LOCK_EX);
-				if(!$locked) {
-					usleep(10);
-				}
+		$datas = '';
+		$entries = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+		foreach($entries as $entry) {
+			$time = intval($entry);
+			if ($now - $time < $this->period) {
+				$datas .= $time . PHP_EOL;
+				$this->lastNb++;
 			}
-			while(!$locked);
-			do {
-				$locked = flock($new, LOCK_EX);
-				if(!$locked) {
-					usleep(10);
-				}
-			}
-			while(!$locked);
-			while (false !== ($buffer = fgets($file))) {
-				$time = intval($buffer);
-				if ($now - $time < $this->period) {
-					fwrite($new, $time . PHP_EOL);
-					$nb++;
-				}
-			}
-			if (!feof($file)) {
-				$fail = true;
-			}
-			fflush($new);
-			flock($new, LOCK_UN);
-			flock($file, LOCK_UN);
 		}
-		else {
-			$fail = true;
+		if($datas) {
+			$tmp = tempnam(sys_get_temp_dir(), 'ratelimit_' . $filename);
+			file_put_contents($tmp, $datas, LOCK_EX);
+			rename($tmp, $path);
 		}
-		fclose($file);
-		fclose($new);
-		if($fail) {
-			return null;
-		}
-		rename($tmp, $path);
-		return $this->lastNb = $nb;
+		return $this->lastNb;
 	}
 
 	/**
