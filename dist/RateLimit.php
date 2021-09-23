@@ -163,7 +163,7 @@ class RateLimit
 	}
 
 	/**
-	 * Set global IPP
+	 * Set global IP
 	 *
 	 * @param string $ip
 	 * @return $this
@@ -172,6 +172,16 @@ class RateLimit
 	{
 		$this->ip = $ip;
 		return $this;
+	}
+
+	/**
+	 * Get global IP
+	 *
+	 * @return $this
+	 */
+	public function getIp(): string
+	{
+		return (string) $this->ip;
 	}
 
 	/**
