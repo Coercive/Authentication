@@ -24,17 +24,33 @@ class StopForumSpam
 {
 	const ENDPOINT = 'http://api.stopforumspam.com/api?json&';
 
-	/** @var callable */
-	private $callback;
+	const TYPE_USERNAME = 'username';
+	const TYPE_EMAIL = 'email';
+	const TYPE_IP = 'ip';
 
 	/** @var callable */
-	private $callbackEmail;
+	private $callbackBefore;
 
 	/** @var callable */
-	private $callbackIp;
+	private $callbackAfter;
 
 	/** @var callable */
-	private $callbackUserName;
+	private $callbackBeforeEmail;
+
+	/** @var callable */
+	private $callbackAfterEmail;
+
+	/** @var callable */
+	private $callbackBeforeIp;
+
+	/** @var callable */
+	private $callbackAfterIp;
+
+	/** @var callable */
+	private $callbackBeforeUserName;
+
+	/** @var callable */
+	private $callbackAfterUserName;
 
 	/**
 	 * @param array $query
@@ -61,6 +77,18 @@ class StopForumSpam
 	 */
 	public function checkEmail(string $email, bool $hash = false): bool
 	{
+		if($this->callbackBefore) {
+			$rcs = ($this->callbackBefore)(self::TYPE_EMAIL, $email);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
+		}
+		if($this->callbackBeforeEmail) {
+			$rcs = ($this->callbackBeforeEmail)($email);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
+		}
 		if($hash) {
 			$query = [
 				'emailhash' => md5($email)
@@ -73,11 +101,17 @@ class StopForumSpam
 		}
 		$arr = $this->get($query);
 		$status = boolval($arr[$hash ? 'emailhash' : 'email']['appears'] ?? 0);
-		if($this->callbackEmail) {
-			($this->callbackEmail)($status, $email);
+		if($this->callbackAfterEmail) {
+			$rcs = ($this->callbackAfterEmail)($status, $email);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
 		}
-		if($this->callback) {
-			($this->callback)($status);
+		if($this->callbackAfter) {
+			$rcs = ($this->callbackAfter)(self::TYPE_EMAIL, $status, $email);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
 		}
 		return $status;
 	}
@@ -91,15 +125,34 @@ class StopForumSpam
 	 */
 	public function checkIp(string $ip): bool
 	{
+		if($this->callbackBefore) {
+			$rcs = ($this->callbackBefore)(self::TYPE_IP, $ip);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
+		}
+		if($this->callbackBeforeIp) {
+			$rcs = ($this->callbackBeforeIp)($ip);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
+		}
 		$arr = $this->get([
 			'ip' => $ip
 		]);
 		$status = boolval($arr['ip']['appears'] ?? 0);
-		if($this->callbackIp) {
-			($this->callbackIp)($status, $ip);
+		if($this->callbackAfterIp) {
+			$rcs = ($this->callbackAfterIp)($status, $ip);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
 		}
-		if($this->callback) {
-			($this->callback)($status);
+		if($this->callbackAfter) {
+			$rcs = ($this->callbackAfter)(self::TYPE_IP, $status, $ip);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
+
 		}
 		return $status;
 	}
@@ -113,17 +166,49 @@ class StopForumSpam
 	 */
 	public function checkUserName(string $name): bool
 	{
+		if($this->callbackBefore) {
+			$rcs = ($this->callbackBefore)(self::TYPE_USERNAME, $name);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
+		}
+		if($this->callbackBeforeUserName) {
+			$rcs = ($this->callbackBeforeUserName)($name);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
+		}
 		$arr = $this->get([
 			'username' => $name
 		]);
 		$status = boolval($arr['username']['appears'] ?? 0);
-		if($this->callbackUserName) {
-			($this->callbackUserName)($status, $name);
+		if($this->callbackAfterUserName) {
+			$rcs = ($this->callbackAfterUserName)($status, $name);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
 		}
-		if($this->callback) {
-			($this->callback)($status);
+		if($this->callbackAfter) {
+			$rcs = ($this->callbackAfter)(self::TYPE_USERNAME, $status, $name);
+			if(null !== $rcs) {
+				return (bool) $rcs;
+			}
 		}
 		return $status;
+	}
+
+	/**
+	 * Add general callback before all checks
+	 *
+	 * Receive only the status in parameter
+	 *
+	 * @param callable $function
+	 * @return $this
+	 */
+	public function setCallbackBefore(callable $function): StopForumSpam
+	{
+		$this->callbackBefore = $function;
+		return $this;
 	}
 
 	/**
@@ -134,9 +219,23 @@ class StopForumSpam
 	 * @param callable $function
 	 * @return $this
 	 */
-	public function setCallback(callable $function): StopForumSpam
+	public function setCallbackAfter(callable $function): StopForumSpam
 	{
-		$this->callback = $function;
+		$this->callbackAfter = $function;
+		return $this;
+	}
+
+	/**
+	 * Add callback before email checks
+	 *
+	 * Receive status and email in parameter
+	 *
+	 * @param callable $function
+	 * @return $this
+	 */
+	public function setCallbackBeforeEmail(callable $function): StopForumSpam
+	{
+		$this->callbackBeforeEmail = $function;
 		return $this;
 	}
 
@@ -148,9 +247,23 @@ class StopForumSpam
 	 * @param callable $function
 	 * @return $this
 	 */
-	public function setCallbackEmail(callable $function): StopForumSpam
+	public function setCallbackAfterEmail(callable $function): StopForumSpam
 	{
-		$this->callbackEmail = $function;
+		$this->callbackAfterEmail = $function;
+		return $this;
+	}
+
+	/**
+	 * Add callback before ip checks
+	 *
+	 * Receive status and ip in parameter
+	 *
+	 * @param callable $function
+	 * @return $this
+	 */
+	public function setCallbackBeforeIp(callable $function): StopForumSpam
+	{
+		$this->callbackBeforeIp = $function;
 		return $this;
 	}
 
@@ -162,9 +275,23 @@ class StopForumSpam
 	 * @param callable $function
 	 * @return $this
 	 */
-	public function setCallbackIp(callable $function): StopForumSpam
+	public function setCallbackAfterIp(callable $function): StopForumSpam
 	{
-		$this->callbackIp = $function;
+		$this->callbackAfterIp = $function;
+		return $this;
+	}
+
+	/**
+	 * Add callback before user name checks
+	 *
+	 * Receive status and name in parameter
+	 *
+	 * @param callable $function
+	 * @return $this
+	 */
+	public function setCallbackBeforeUserName(callable $function): StopForumSpam
+	{
+		$this->callbackBeforeUserName = $function;
 		return $this;
 	}
 
@@ -176,9 +303,9 @@ class StopForumSpam
 	 * @param callable $function
 	 * @return $this
 	 */
-	public function setCallbackUserName(callable $function): StopForumSpam
+	public function setCallbackAfterUserName(callable $function): StopForumSpam
 	{
-		$this->callbackUserName = $function;
+		$this->callbackAfterUserName = $function;
 		return $this;
 	}
 }

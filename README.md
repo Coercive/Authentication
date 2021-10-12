@@ -138,40 +138,46 @@ use Coercive\Security\Authentication\StopForumSpam;
 
 $sfspam = new StopForumSpam;
 
+# Global callback is used before each check
+$sfspam->setCallbackBefore(function ($type, $value) {
+
+    # Do something...
+    if($type === StopForumSpam::TYPE_EMAIL && $value === 'test@email.com') {
+        echo 'hello world';
+    }
+
+    # Return not-null => stop processing and force return boolean casted value of your return
+    return true;
+    return false;
+    
+    # No return or return null => continue processing
+    return null;
+});
 # Global callback is used after each check
-$sfspam->setCallback(function ($status) {
-    if($status) {
+$sfspam->setCallbackAfter(function ($type, $status, $value) {
+    echo $value;
+    if($type === StopForumSpam::TYPE_EMAIL && $status) {
         exit;
     }
+
+    # Return not-null => override api status and force return boolean casted value of your return
+    return true;
+    return false;
+
+    # No return or return null => return api status
+    return null;
 });
 
-# Email callback is used after email check, before global check
-$sfspam->setCallbackEmail(function ($status, $email) {
-    if($status) {
-        error_log(print_r("The email : $email, is a spammer.", true));
-    }
-    else {
-        error_log(print_r("The email ; $email, is not a spammer.", true));
-    }
+# You can override value when pass a parameter as a reference
+$sfspam->setCallbackBefore(function ($type, &$value) {
+    $value = 'new value';
 });
 
-# Email callback is used after IP check, before global check
-$sfspam->setCallbackIp(function ($status, $ip) {
-    if($status) {
-        error_log(print_r("The ip : $ip, is a spammer.", true));
-    }
-    else {
-        error_log(print_r("The ip : $ip, is not a spammer.", true));
-    }
-});
-
-# Email callback is used after username check, before global check
-$sfspam->setCallbackUserName(function ($status, $name) {
-    if($status) {
-        error_log(print_r("The username : $name, is a spammer.", true));
-    }
-    else {
-        error_log(print_r("The username : $name, is not a spammer.", true));
-    }
-});
+# You have also specific callback for each type
+$sfspam->setCallbackBeforeEmail(function ($email) {});
+$sfspam->setCallbackAfterEmail(function ($status, $email) {});
+$sfspam->setCallbackBeforeIp(function ($ip) {});
+$sfspam->setCallbackAfterIp(function ($status, $ip) {});
+$sfspam->setCallbackBeforeIp(function ($name) {});
+$sfspam->setCallbackAfterUserName(function ($status, $name) {});
 ```
