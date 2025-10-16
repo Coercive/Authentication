@@ -9,12 +9,12 @@ use Exception;
  * From API Stop Forum Spam
  * https://www.stopforumspam.com
  *
- * @package 	Coercive\Security\Authentication
- * @link		https://github.com/Coercive/Authentication
+ * @package Coercive\Security\Authentication
+ * @link https://github.com/Coercive/Authentication
  *
- * @author  	Anthony Moral <contact@coercive.fr>
- * @copyright   2021 Anthony Moral
- * @license 	MIT
+ * @author Anthony Moral <contact@coercive.fr>
+ * @copyright 2025 Anthony Moral
+ * @license MIT
  *
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed

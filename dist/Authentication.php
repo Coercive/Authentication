@@ -4,12 +4,12 @@ namespace Coercive\Security\Authentication;
 /**
  * Authentication
  *
- * @package 	Coercive\Security\Authentication
- * @link		https://github.com/Coercive/Authentication
+ * @package Coercive\Security\Authentication
+ * @link https://github.com/Coercive/Authentication
  *
- * @author  	Anthony Moral <contact@coercive.fr>
- * @copyright   2020 Anthony Moral
- * @license 	MIT
+ * @author Anthony Moral <contact@coercive.fr>
+ * @copyright 2025 Anthony Moral
+ * @license MIT
  */
 class Authentication
 {
@@ -23,7 +23,7 @@ class Authentication
 	private int $cost = self::DEFAULT_COST;
 
 	/** @var mixed : Algo of hash method */
-	private $algo = self::DEFAULT_ALGO;
+	private string $algo = self::DEFAULT_ALGO;
 
 	/** @var int : Debounce delay for miswriting password */
 	private int $debounce = 0;
@@ -31,10 +31,11 @@ class Authentication
 	/**
 	 * Authentication constructor.
 	 *
-	 * @param int $cost [optional]
+	 * @param int|null $cost [optional]
 	 * @param mixed $algo [optional]
+	 * @return void
 	 */
-	public function __construct(? int $cost = null, $algo = null)
+	public function __construct(? int $cost = null, ? string $algo = null)
 	{
 		if(null !== $cost) {
 			$this->cost = $cost;
@@ -45,7 +46,7 @@ class Authentication
 	}
 
 	/**
-	 * DEBOUNCE
+	 * Debounce
 	 *
 	 * Random sleep delay for miswriting password
 	 *
@@ -67,7 +68,7 @@ class Authentication
 	 */
 	public function hash(string $password): string
 	{
-		return (string) password_hash($password, $this->algo, ['cost' => $this->cost]);
+		return password_hash($password, $this->algo, ['cost' => $this->cost]);
 	}
 
 	/**

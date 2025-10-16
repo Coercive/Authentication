@@ -6,12 +6,12 @@ use Exception;
 /**
  * Class RateLimit
  *
- * @package 	Coercive\Security\Authentication
- * @link		https://github.com/Coercive/Authentication
+ * @package Coercive\Security\Authentication
+ * @link https://github.com/Coercive/Authentication
  *
- * @author  	Anthony Moral <contact@coercive.fr>
- * @copyright   2021 Anthony Moral
- * @license 	MIT
+ * @author Anthony Moral <contact@coercive.fr>
+ * @copyright 2021 Anthony Moral
+ * @license MIT
  *
  * For the full copyright and license information,
  * please view the LICENSE file that was distributed
@@ -47,7 +47,7 @@ class RateLimit
 
 	/**
 	 * Debounce delay for not allowed (in microseconds)
-	 * @var int $debounce
+	 * @var int|null $debounce
 	 */
 	private ? int $debounce = null;
 
@@ -67,7 +67,7 @@ class RateLimit
 	 * @param int $delay
 	 * @return void
 	 */
-	static public function sleep(int $delay)
+	static public function sleep(int $delay): void
 	{
 		if($delay > static::MICRO2SECONDS) {
 			$seconds = (int) floor($delay / static::MICRO2SECONDS);
@@ -87,10 +87,10 @@ class RateLimit
 
 	/**
 	 * @param string $path
-	 * @return RateLimit
+	 * @return void
 	 * @throws Exception
 	 */
-	private function setPath(string $path): RateLimit
+	private function setPath(string $path): void
 	{
 		$this->path = realpath($path);
 		if (!$this->path || !is_dir($this->path)) {
@@ -99,7 +99,6 @@ class RateLimit
 			}
 			$this->path = realpath($path);
 		}
-		return $this;
 	}
 
 	/**
@@ -177,7 +176,7 @@ class RateLimit
 	/**
 	 * Get global IP
 	 *
-	 * @return $this
+	 * @return string
 	 */
 	public function getIp(): string
 	{
@@ -187,7 +186,7 @@ class RateLimit
 	/**
 	 * Sleep delay for not allowed
 	 *
-	 * @param int $delay [optional] In microseconds
+	 * @param int|null $delay [optional] In microseconds
 	 * @return $this
 	 */
 	public function debounce(? int $delay = null): RateLimit
@@ -203,7 +202,7 @@ class RateLimit
 	 * @return $this
 	 * @throws Exception
 	 */
-	public function set(string $ip = null): RateLimit
+	public function set(string $ip = ''): RateLimit
 	{
 		if(!$ip) {
 			$ip = $this->ip;
@@ -225,7 +224,7 @@ class RateLimit
 	 * @return int|null
 	 * @throws Exception
 	 */
-	public function get(string $ip = null): ?int
+	public function get(string $ip = ''): ? int
 	{
 		$this->lastNb = 0;
 
@@ -277,10 +276,10 @@ class RateLimit
 	 * @return bool
 	 * @throws Exception
 	 */
-	public function isAllowed(string $ip = null, bool $strict = false): bool
+	public function isAllowed(string $ip = '', bool $strict = false): bool
 	{
 		$result = $this->get($ip);
-		$allowed = ($strict ? null !== $result : true) && $this->requests >= $result;
+		$allowed = (!$strict || null !== $result) && $this->requests >= $result;
 		if(!$allowed && $this->debounce) {
 			self::sleep($this->debounce);
 		}

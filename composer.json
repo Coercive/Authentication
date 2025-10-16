@@ -5,28 +5,30 @@
     "homepage": "http://coercive.fr",
     "license": "MIT",
     "licenses": [{
-      "type": "MIT",
-      "url": "https://github.com/Coercive/Authentication/blob/master/LICENSE.txt"
+        "type": "MIT",
+        "url": "https://github.com/Coercive/Authentication/blob/master/LICENSE.txt"
     }],
     "authors": [
         {
             "name": "Anthony Moral",
-            "email": "contact@coercive.fr",
-            "homepage": "http://coercive.fr"
+            "email": "contact@coercive.fr"
         }
     ],
+    "require-dev": {
+        "phpunit/phpunit": "^12"
+    },
     "require": {
         "php": ">=7.4",
         "ext-json": "*"
     },
     "autoload": {
-        "psr-4": { "Coercive\\Security\\Authentication\\": "dist/" }
-    },
-    "minimum-stability" : "dev",
-    "prefer-stable" : true,
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1-dev"
+        "psr-4": {
+            "Coercive\\Security\\Authentication\\": "dist/"
         }
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/"
+        ]
     }
 }
